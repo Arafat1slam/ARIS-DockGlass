@@ -18,10 +18,10 @@ class DockController(QObject):
         self.app_state = app_state
         self.items: List[DockItem] = []
         self.cursor_pos: QPoint = QPoint(-1000, -1000)
-        self.base_size: float = 50.0
-        self.max_scale: float = 1.75
-        self.falloff_sigma: float = 75.0
-        self.spacing: float = 12.0
+        self.base_size: float = 38.0
+        self.max_scale: float = 1.55
+        self.falloff_sigma: float = 58.0
+        self.spacing: float = 8.0
         self.total_width: float = 0.0
         self.dock_rect_x: float = 0.0
         self.hovered_item: Optional[DockItem] = None
@@ -40,9 +40,11 @@ class DockController(QObject):
         configs = []
         if settings and settings.items:
             configs = settings.items
-            self.base_size = float(settings.dock.base_icon_px)
-            self.max_scale = float(settings.dock.max_scale)
-            self.falloff_sigma = float(settings.dock.falloff_sigma * self.base_size)
+            self.base_size = float(settings.dock.base_icon_px or 38.0)
+            self.max_scale = float(settings.dock.max_scale or 1.55)
+            self.falloff_sigma = float(getattr(settings.dock, 'falloff_sigma', 1.4) * self.base_size)
+            self.spacing = 8.0
+
         else:
             configs = get_default_dock_items()
 

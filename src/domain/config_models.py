@@ -25,19 +25,20 @@ class DockSettings:
     enabled: bool = True
     position: str = 'BOTTOM_CENTER'
     vertical_offset_px: int = 0
-    base_icon_px: int = 48
-    max_scale: float = 1.5
-    falloff_sigma: float = 1.5
+    base_icon_px: int = 38
+    max_scale: float = 1.55
+    falloff_sigma: float = 1.4
 
     def validate(self):
         if self.position not in ('BOTTOM_CENTER', 'BOTTOM_LEFT', 'BOTTOM_RIGHT'):
             self.position = 'BOTTOM_CENTER'
-        if not (32 <= self.base_icon_px <= 96):
-            self.base_icon_px = 48
+        if not (24 <= self.base_icon_px <= 96):
+            self.base_icon_px = 38
         if not (1.0 <= self.max_scale <= 2.0):
-            self.max_scale = 1.5
+            self.max_scale = 1.55
         if not (0.5 <= self.falloff_sigma <= 3.0):
-            self.falloff_sigma = 1.5
+            self.falloff_sigma = 1.4
+
 
 @dataclass
 class AppConfig:

@@ -57,34 +57,30 @@ class DockWindow(QWidget):
             return
         geo = screen.geometry()
         
-        # Generous height to accommodate magnification upwards and tooltips
         max_icon_h = self.controller.base_size * self.controller.max_scale
-        win_height = int(max_icon_h + 60)
-        
-        # Dock width plus padding
-        win_width = max(int(self.controller.total_width + 80), 240)
+        win_height = int(max_icon_h + 36)
+        win_width = max(int(self.controller.total_width + 50), 200)
         
         win_x = (geo.width() - win_width) // 2
-        # Position anchored to bottom
         win_y = geo.height() - win_height
 
         self.setGeometry(win_x, win_y, win_width, win_height)
         self.update_click_mask()
 
     def update_click_mask(self) -> None:
-        pill_w = self.controller.total_width + 28
-        pill_h = self.controller.base_size + 18
+        pill_w = self.controller.total_width + 16
+        pill_h = self.controller.base_size + 10
         pill_x = (self.width() - pill_w) / 2.0
-        pill_y = self.height() - pill_h - 6
+        pill_y = self.height() - pill_h - 3
         
-        # Mask only the dock pill and upper magnification zone
         mask_rect = QRect(
-            int(pill_x - 10),
-            int(pill_y - 45),
-            int(pill_w + 20),
-            int(pill_h + 55)
+            int(pill_x - 6),
+            int(pill_y - 30),
+            int(pill_w + 12),
+            int(pill_h + 36)
         )
         self.setMask(QRegion(mask_rect))
+
 
     def on_layout_updated(self) -> None:
         self.update_geometry()
@@ -168,29 +164,29 @@ class DockWindow(QWidget):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
 
-        pill_w = self.controller.total_width + 28
-        pill_h = self.controller.base_size + 18
+        pill_w = self.controller.total_width + 16
+        pill_h = self.controller.base_size + 10
         pill_x = (self.width() - pill_w) / 2.0
-        pill_y = self.height() - pill_h - 6
+        pill_y = self.height() - pill_h - 3
         pill_rect = QRectF(pill_x, pill_y, pill_w, pill_h)
 
         # 1. macOS Glass Pill Background
         painter.setBrush(QColor(18, 22, 32, 175))
-        painter.setPen(QPen(QColor(255, 255, 255, 55), 1.5))
-        painter.drawRoundedRect(pill_rect, 20, 20)
+        painter.setPen(QPen(QColor(255, 255, 255, 55), 1.2))
+        painter.drawRoundedRect(pill_rect, 14, 14)
 
         # Inner glossy top reflection
-        painter.setPen(QPen(QColor(255, 255, 255, 35), 1.0))
-        painter.drawLine(int(pill_x + 20), int(pill_y + 1), int(pill_x + pill_w - 20), int(pill_y + 1))
+        painter.setPen(QPen(QColor(255, 255, 255, 30), 1.0))
+        painter.drawLine(int(pill_x + 14), int(pill_y + 1), int(pill_x + pill_w - 14), int(pill_y + 1))
 
         # 2. Draw Items
-        items_start_x = pill_x + 14.0
+        items_start_x = pill_x + 8.0
         for item in self.controller.items:
             scale = getattr(item, 'scale', 1.0)
             item_center_x = items_start_x + item.x + item.width / 2.0
             
             # Bottom of icon anchored near bottom of pill
-            baseline_y = pill_y + pill_h - 10
+            baseline_y = pill_y + pill_h - 5
             
             item_draw_rect = QRect(
                 int(item_center_x - item.width / 2.0),
@@ -198,6 +194,7 @@ class DockWindow(QWidget):
                 int(item.width),
                 int(item.height)
             )
+
             item.paint(painter, item_draw_rect, scale, None)
 
         # 3. macOS Floating Tooltip Bubble
