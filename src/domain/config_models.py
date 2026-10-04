@@ -101,13 +101,6 @@ def get_default_dock_items() -> List[DockItemConfig]:
     import os
     defaults = []
     
-    # 0. Windows Start Menu
-    defaults.append(DockItemConfig(
-        id="default-start",
-        kind="APP",
-        app=AppConfig(target="start-menu", display_name="Start Menu")
-    ))
-
     # 1. File Explorer
     explorer_path = r"C:\Windows\explorer.exe"
     if os.path.exists(explorer_path):
@@ -116,6 +109,7 @@ def get_default_dock_items() -> List[DockItemConfig]:
             kind="APP",
             app=AppConfig(target=explorer_path, display_name="File Explorer")
         ))
+
 
         
     # 2. Web Browser (Brave or Edge)

@@ -60,26 +60,41 @@ class TaskbarTheme(QObject):
     def restore_default(cls) -> None:
         try:
             inst = cls()
-            inst.set_taskbar_visible(True)
             inst.restore()
         except Exception:
             pass
 
-
     def set_mode(self, mode: TaskbarMode, tint_color: int = 0x00000000) -> None:
-
         self.mode = mode
         self.tint_color = tint_color
         self.apply()
 
-    def set_taskbar_visible(self, visible: bool) -> None:
+    def set_native_icons_visible(self, visible: bool) -> None:
+        """
+        Show or hide the native taskbar icon list (MSTaskListWClass) in the middle,
+        keeping the Start button on the left and the System Tray / Clock on the right!
+        """
         hwnds = self._get_taskbars()
         SW_HIDE = 0
         SW_SHOW = 5
         cmd = SW_SHOW if visible else SW_HIDE
-        for hwnd in hwnds:
+        for tray in hwnds:
             try:
-                user32.ShowWindow(hwnd, cmd)
+                # Ensure the main Windows taskbar itself is ALWAYS visible!
+                user32.ShowWindow(tray, SW_SHOW)
+                
+                # Hide only the middle icon bar so our Mac-animated icons can sit there cleanly
+                rebar = user32.FindWindowExW(tray, 0, "ReBarWindow32", None)
+                if rebar:
+                    task_sw = user32.FindWindowExW(rebar, 0, "MSTaskSwWClass", None)
+                    if task_sw:
+                        task_list = user32.FindWindowExW(task_sw, 0, "MSTaskListWClass", None)
+                        if task_list:
+                            user32.ShowWindow(task_list, cmd)
+                        else:
+                            user32.ShowWindow(task_sw, cmd)
+                    else:
+                        user32.ShowWindow(rebar, cmd)
             except Exception:
                 pass
 
@@ -90,24 +105,20 @@ class TaskbarTheme(QObject):
             self._original_captured = True
 
         for hwnd in hwnds:
+            # Always ensure taskbar is visible
+            user32.ShowWindow(hwnd, 5) # SW_SHOW
             self._apply_to_hwnd(hwnd)
 
-        # Check if user wants native taskbar hidden
-        hide_tb = True
-        if self.app_state and hasattr(self.app_state, 'settings_store') and self.app_state.settings_store:
-            try:
-                st = self.app_state.settings_store.load()
-                hide_tb = getattr(st.taskbar, 'hide_windows_taskbar', True)
-            except Exception:
-                pass
-        self.set_taskbar_visible(not hide_tb)
+        # Hide native middle icons so ARIS animated dock icons sit in the middle cleanly
+        self.set_native_icons_visible(False)
 
     def restore(self) -> None:
-        self.set_taskbar_visible(True)
+        # Restore native icons and taskbar state
+        self.set_native_icons_visible(True)
         hwnds = self._get_taskbars()
         for hwnd in hwnds:
+            user32.ShowWindow(hwnd, 5) # SW_SHOW
             self._restore_hwnd(hwnd)
-
 
     def _get_taskbars(self) -> list:
         hwnds = []
@@ -138,10 +149,13 @@ class TaskbarTheme(QObject):
         data.Attribute = 19 # WCA_ACCENT_POLICY
         data.Data = ctypes.pointer(policy)
         data.SizeOfData = ctypes.sizeof(policy)
-        SetWindowCompositionAttribute(hwnd, ctypes.byref(data))
+        try:
+            SetWindowCompositionAttribute(hwnd, ctypes.byref(data))
+        except Exception:
+            pass
 
     def _capture_original(self, hwnd: int) -> None:
-        pass # Logic to retrieve current WCA_ACCENT_POLICY could go here
+        pass
 
     def _restore_hwnd(self, hwnd: int) -> None:
         policy = ACCENT_POLICY()
@@ -150,4 +164,7 @@ class TaskbarTheme(QObject):
         data.Attribute = 19
         data.Data = ctypes.pointer(policy)
         data.SizeOfData = ctypes.sizeof(policy)
-        SetWindowCompositionAttribute(hwnd, ctypes.byref(data))
+        try:
+            SetWindowCompositionAttribute(hwnd, ctypes.byref(data))
+        except Exception:
+            pass

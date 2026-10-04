@@ -19,7 +19,7 @@ class DockWindow(QWidget):
         self.controller = controller
         self.app_state = app_state
 
-        # Window Flags: Frameless, Always on Top, Tool Window (no Alt-Tab)
+        # Window Flags: Frameless, Always on Top, Tool Window
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint |
@@ -57,33 +57,32 @@ class DockWindow(QWidget):
             return
         geo = screen.geometry()
         
-        max_icon_h = self.controller.base_size * self.controller.max_scale
-        win_height = int(max_icon_h + 36)
-        win_width = max(int(self.controller.total_width + 50), 200)
+        # Room for upwards magnification wave (60px icon height + margin)
+        win_height = 80
+        win_width = geo.width()
         
-        win_x = (geo.width() - win_width) // 2
+        # Span across the screen horizontally, anchored right at the bottom
+        win_x = 0
         win_y = geo.height() - win_height
 
         self.setGeometry(win_x, win_y, win_width, win_height)
         self.update_click_mask()
 
     def update_click_mask(self) -> None:
-        pill_w = self.controller.total_width + 16
-        pill_h = self.controller.base_size + 10
-        pill_x = (self.width() - pill_w) / 2.0
-        pill_y = self.height() - pill_h - 3
+        # Mask strictly around the middle dock icons area so Start button & Tray are 100% clickable!
+        items_w = self.controller.total_width + 24
+        items_x = (self.width() - items_w) / 2.0
         
         mask_rect = QRect(
-            int(pill_x - 6),
-            int(pill_y - 30),
-            int(pill_w + 12),
-            int(pill_h + 36)
+            int(items_x),
+            0,
+            int(items_w),
+            self.height()
         )
         self.setMask(QRegion(mask_rect))
 
-
     def on_layout_updated(self) -> None:
-        self.update_geometry()
+        self.update_click_mask()
         self.update()
 
     def on_frame(self) -> None:
@@ -101,8 +100,8 @@ class DockWindow(QWidget):
         super().leaveEvent(event)
 
     def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        pill_left = (self.width() - self.controller.total_width) / 2.0
-        local_x = event.position().x() - pill_left
+        items_start_x = (self.width() - self.controller.total_width) / 2.0
+        local_x = event.position().x() - items_start_x
         self.controller.update_hover(QPoint(int(local_x), int(event.position().y())))
         if not self.anim_timer.isActive():
             self.anim_timer.start()
@@ -110,8 +109,8 @@ class DockWindow(QWidget):
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         if event.button() == Qt.MouseButton.LeftButton:
-            pill_left = (self.width() - self.controller.total_width) / 2.0
-            click_x = event.position().x() - pill_left
+            items_start_x = (self.width() - self.controller.total_width) / 2.0
+            click_x = event.position().x() - items_start_x
             for item in self.controller.items:
                 if item.x <= click_x <= item.x + item.width:
                     item.on_click()
@@ -125,10 +124,9 @@ class DockWindow(QWidget):
     def _show_context_menu(self, global_pos: QPoint) -> None:
         menu = QMenu(self)
         
-        # Check if clicked on a specific item
-        pill_left = (self.width() - self.controller.total_width) / 2.0
+        items_start_x = (self.width() - self.controller.total_width) / 2.0
         local_pos = self.mapFromGlobal(global_pos)
-        click_x = local_pos.x() - pill_left
+        click_x = local_pos.x() - items_start_x
         clicked_item = None
         for item in self.controller.items:
             if item.x <= click_x <= item.x + item.width:
@@ -164,29 +162,22 @@ class DockWindow(QWidget):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
 
-        pill_w = self.controller.total_width + 16
-        pill_h = self.controller.base_size + 10
-        pill_x = (self.width() - pill_w) / 2.0
-        pill_y = self.height() - pill_h - 3
-        pill_rect = QRectF(pill_x, pill_y, pill_w, pill_h)
+        items_start_x = (self.width() - self.controller.total_width) / 2.0
+        # Bottom of icons aligns with the taskbar icons baseline
+        baseline_y = self.height() - 4
 
-        # 1. macOS Glass Pill Background
-        painter.setBrush(QColor(18, 22, 32, 175))
-        painter.setPen(QPen(QColor(255, 255, 255, 55), 1.2))
-        painter.drawRoundedRect(pill_rect, 14, 14)
+        # 1. Subtle sleek hover glow shelf under the middle items
+        if self.underMouse() or self.controller.hovered_item:
+            glow_w = self.controller.total_width + 20
+            glow_rect = QRectF(items_start_x - 10, baseline_y - self.controller.base_size - 4, glow_w, self.controller.base_size + 8)
+            painter.setBrush(QColor(255, 255, 255, 12))
+            painter.setPen(QPen(QColor(255, 255, 255, 25), 1.0))
+            painter.drawRoundedRect(glow_rect, 10, 10)
 
-        # Inner glossy top reflection
-        painter.setPen(QPen(QColor(255, 255, 255, 30), 1.0))
-        painter.drawLine(int(pill_x + 14), int(pill_y + 1), int(pill_x + pill_w - 14), int(pill_y + 1))
-
-        # 2. Draw Items
-        items_start_x = pill_x + 8.0
+        # 2. Draw Items with Mac Magnification Wave
         for item in self.controller.items:
             scale = getattr(item, 'scale', 1.0)
             item_center_x = items_start_x + item.x + item.width / 2.0
-            
-            # Bottom of icon anchored near bottom of pill
-            baseline_y = pill_y + pill_h - 5
             
             item_draw_rect = QRect(
                 int(item_center_x - item.width / 2.0),
@@ -194,7 +185,6 @@ class DockWindow(QWidget):
                 int(item.width),
                 int(item.height)
             )
-
             item.paint(painter, item_draw_rect, scale, None)
 
         # 3. macOS Floating Tooltip Bubble
@@ -202,7 +192,6 @@ class DockWindow(QWidget):
         if hovered and hovered.display_name:
             scale = getattr(hovered, 'scale', 1.0)
             item_center_x = items_start_x + hovered.x + hovered.width / 2.0
-            baseline_y = pill_y + pill_h - 10
             top_y = baseline_y - (hovered.height * scale) - getattr(hovered, 'bounce_offset', 0)
             
             font = QFont("Segoe UI", 9)
