@@ -32,3 +32,26 @@ def compute_positions(scaled_widths: List[float], spacing: float, position_mode:
         current_x += width + spacing
 
     return positions, total_width
+ 
+def calculate_layout(items: list, spacing: float = 10.0, position: str = 'BOTTOM_CENTER') -> dict:
+    """
+    Calculate layout dictionary containing total_width and item positions.
+    """
+    scaled_widths = [item['width'] * item.get('scale', 1.0) if isinstance(item, dict) else getattr(item, 'width', 48) for item in items]
+    total_width = sum(scaled_widths) + max(0, len(scaled_widths) - 1) * spacing
+    
+    if position == 'BOTTOM_CENTER':
+        start_x = -total_width / 2.0
+    else:
+        start_x = 0.0
+
+    layout_items = []
+    curr_x = start_x
+    for i, w in enumerate(scaled_widths):
+        layout_items.append({'x': curr_x, 'width': w})
+        curr_x += w + spacing
+        
+    return {
+        'total_width': total_width,
+        'items': layout_items
+    }

@@ -5,9 +5,11 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 
 class SettingsWindow(QWidget):
-    def __init__(self) -> None:
+    def __init__(self, app_state=None) -> None:
         super().__init__()
+        self.app_state = app_state
         self.setWindowTitle("DockGlass Settings")
+
         self.resize(600, 450)
         
         layout = QVBoxLayout(self)

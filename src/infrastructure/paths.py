@@ -26,3 +26,34 @@ def get_cache_dir() -> str:
     cache_dir = os.path.realpath(os.path.join(get_localappdata_dir(), "cache"))
     os.makedirs(cache_dir, exist_ok=True)
     return cache_dir
+ 
+def validate_path(path: str):
+    """
+    Validate and normalize a file path or URL.
+    Returns normalized path / url if valid, or False if invalid.
+    """
+    if not path or not isinstance(path, str):
+        return False
+    
+    # Check URLs
+    lower_path = path.lower()
+    if lower_path.startswith("javascript:") or lower_path.startswith("file:"):
+        return False
+    if lower_path.startswith("http://") or lower_path.startswith("https://"):
+        return path
+        
+    # Check directory traversal
+    parts = path.replace("\\", "/").split("/")
+    if ".." in parts:
+        # Check if it has a root drive
+        if not (len(path) > 1 and path[1] == ":"):
+            return False
+            
+    try:
+        norm = os.path.normpath(path)
+        # If relative traversal like ../secret.txt
+        if norm.startswith(".."):
+            return False
+        return norm
+    except Exception:
+        return False

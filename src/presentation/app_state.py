@@ -10,8 +10,9 @@ class AppState(QObject):
     settings_requested = Signal()
     quit_requested = Signal()
 
-    def __init__(self) -> None:
+    def __init__(self, settings_store=None) -> None:
         super().__init__()
+        self.settings_store = settings_store
         self._enabled: bool = True
 
     @property

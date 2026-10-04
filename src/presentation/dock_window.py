@@ -10,9 +10,11 @@ GWL_EXSTYLE = -20
 WS_EX_NOACTIVATE = 0x08000000
 
 class DockWindow(QWidget):
-    def __init__(self, controller: DockController) -> None:
+    def __init__(self, controller: DockController, app_state=None) -> None:
         super().__init__()
         self.controller = controller
+        self.app_state = app_state
+
         
         # Window Flags: Frameless, Top, Tool
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)

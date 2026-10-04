@@ -85,3 +85,41 @@ class SettingsStore:
         except Exception as e:
             logger.error(f"Failed to import settings from {import_path}: {e}")
             return False
+
+    @property
+    def path(self) -> str:
+        return self.file_path
+
+    def get_all(self) -> dict:
+        if self._settings is None:
+            self.load()
+        return self._settings.to_dict()
+
+    def validate(self, data: dict) -> bool:
+        try:
+            Settings.from_dict(data)
+            return True
+        except Exception:
+            return False
+
+    def get(self, key: str, default=None):
+        if self._settings is None:
+            self.load()
+        if hasattr(self._settings.dock, key):
+            return getattr(self._settings.dock, key)
+        if key == 'magnification_scale':
+            return self._settings.dock.max_scale
+        return default
+
+    def set(self, key: str, value) -> None:
+        if self._settings is None:
+            self.load()
+        if key == 'magnification_scale':
+            if value < 1.0 or value > 2.0:
+                raise ValueError("Magnification scale must be between 1.0 and 2.0")
+            self._settings.dock.max_scale = float(value)
+        elif hasattr(self._settings.dock, key):
+            setattr(self._settings.dock, key, value)
+        else:
+            raise KeyError(f"Unknown key: {key}")
+

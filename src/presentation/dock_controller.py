@@ -17,8 +17,9 @@ class DockController(QObject):
     items_changed = Signal()
     layout_updated = Signal()
 
-    def __init__(self) -> None:
+    def __init__(self, app_state=None) -> None:
         super().__init__()
+        self.app_state = app_state
         self.items: List[DockItem] = []
         self.cursor_pos: QPoint = QPoint(-1, -1)
         self.base_size: float = 48.0

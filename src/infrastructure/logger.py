@@ -36,3 +36,7 @@ def setup_logger(level: int = logging.INFO) -> logging.Logger:
     return logger
 
 logger = setup_logger()
+setup_logging = setup_logger
+
+def get_logger(name: str = None) -> logging.Logger:
+    return logging.getLogger(name or "ARIS_DockGlass")

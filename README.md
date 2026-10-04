@@ -88,7 +88,27 @@
 - **Windows 10** (version 1809+) or **Windows 11**
 - **Python 3.11** or newer
 
-### Installation
+### 💻 Option 1: One-Click Installer (Recommended for Users)
+
+1. Double-click `Install.bat`
+2. The installer will:
+   - Install **ARIS DockGlass** to `%LOCALAPPDATA%\Programs\ARIS-DockGlass`
+   - Create a **Desktop Shortcut**
+   - Add a shortcut to your **Start Menu**
+   - Provide an automatic **Uninstaller**
+3. Launch directly from Desktop or Start Menu!
+
+---
+
+### 🚀 Option 2: Run Standalone Executable
+
+If you just want to run without installing:
+- Navigate to the `dist/` folder and double-click **`ARIS-DockGlass.exe`**.
+- It is 100% portable and requires no Python or extra runtimes.
+
+---
+
+### 🛠️ Option 3: Developer Setup & Rebuilding
 
 ```bash
 # Clone the repository
@@ -98,19 +118,13 @@ cd ARIS-DockGlass
 # Install dependencies
 pip install -r requirements.txt
 
-# Run the app
+# Run directly from source
 python main.py
+
+# Or rebuild the .exe anytime with 1-click
+build.bat
 ```
 
-### Build Standalone Executable
-
-```bash
-# Install PyInstaller
-pip install pyinstaller
-
-# Build (one-folder mode)
-pyinstaller --noconsole --name "ARIS DockGlass" --icon=icon.ico main.py
-```
 
 ---
 

@@ -40,8 +40,9 @@ class TaskbarMode(Enum):
     TINT = "TINT"
 
 class TaskbarTheme(QObject):
-    def __init__(self) -> None:
+    def __init__(self, app_state=None) -> None:
         super().__init__()
+        self.app_state = app_state
         self.mode: TaskbarMode = TaskbarMode.BLUR
         self.tint_color: int = 0x00000000
         
@@ -52,7 +53,19 @@ class TaskbarTheme(QObject):
         self._watchdog.timeout.connect(self.apply)
         self._watchdog.start(2000)
 
+    def apply_theme(self) -> None:
+        self.apply()
+
+    @classmethod
+    def restore_default(cls) -> None:
+        try:
+            inst = cls()
+            inst.restore()
+        except Exception:
+            pass
+
     def set_mode(self, mode: TaskbarMode, tint_color: int = 0x00000000) -> None:
+
         self.mode = mode
         self.tint_color = tint_color
         self.apply()

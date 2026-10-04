@@ -17,8 +17,11 @@ class TestMagnification(unittest.TestCase):
         self.assertGreater(scale1, scale2)
 
     def test_easing_converges(self):
-        scale = compute_scale(100, max_scale=2.0, radius=100)
-        self.assertAlmostEqual(scale, 1.0, places=2)
+        val = 2.0
+        for _ in range(50):
+            val = ease_toward(val, 1.0)
+        self.assertAlmostEqual(val, 1.0, places=2)
 
 if __name__ == '__main__':
+
     unittest.main()
