@@ -69,35 +69,6 @@ class TaskbarTheme(QObject):
         self.tint_color = tint_color
         self.apply()
 
-    def set_native_icons_visible(self, visible: bool) -> None:
-        """
-        Show or hide the native taskbar icon list (MSTaskListWClass) in the middle,
-        keeping the Start button on the left and the System Tray / Clock on the right!
-        """
-        hwnds = self._get_taskbars()
-        SW_HIDE = 0
-        SW_SHOW = 5
-        cmd = SW_SHOW if visible else SW_HIDE
-        for tray in hwnds:
-            try:
-                # Ensure the main Windows taskbar itself is ALWAYS visible!
-                user32.ShowWindow(tray, SW_SHOW)
-                
-                # Hide only the middle icon bar so our Mac-animated icons can sit there cleanly
-                rebar = user32.FindWindowExW(tray, 0, "ReBarWindow32", None)
-                if rebar:
-                    task_sw = user32.FindWindowExW(rebar, 0, "MSTaskSwWClass", None)
-                    if task_sw:
-                        task_list = user32.FindWindowExW(task_sw, 0, "MSTaskListWClass", None)
-                        if task_list:
-                            user32.ShowWindow(task_list, cmd)
-                        else:
-                            user32.ShowWindow(task_sw, cmd)
-                    else:
-                        user32.ShowWindow(rebar, cmd)
-            except Exception:
-                pass
-
     def apply(self) -> None:
         hwnds = self._get_taskbars()
         if not self._original_captured and hwnds:
@@ -105,16 +76,11 @@ class TaskbarTheme(QObject):
             self._original_captured = True
 
         for hwnd in hwnds:
-            # Always ensure taskbar is visible
+            # Keep Windows taskbar 100% visible and apply glass/blur theme
             user32.ShowWindow(hwnd, 5) # SW_SHOW
             self._apply_to_hwnd(hwnd)
 
-        # Hide native middle icons so ARIS animated dock icons sit in the middle cleanly
-        self.set_native_icons_visible(False)
-
     def restore(self) -> None:
-        # Restore native icons and taskbar state
-        self.set_native_icons_visible(True)
         hwnds = self._get_taskbars()
         for hwnd in hwnds:
             user32.ShowWindow(hwnd, 5) # SW_SHOW

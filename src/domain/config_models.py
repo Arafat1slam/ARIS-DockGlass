@@ -99,73 +99,57 @@ class GeneralSettings:
 
 def get_default_dock_items() -> List[DockItemConfig]:
     import os
+    import glob
     defaults = []
-    
-    # 1. File Explorer
-    explorer_path = r"C:\Windows\explorer.exe"
-    if os.path.exists(explorer_path):
-        defaults.append(DockItemConfig(
-            id="default-explorer",
-            kind="APP",
-            app=AppConfig(target=explorer_path, display_name="File Explorer")
-        ))
+    seen_names = set()
 
+    # 1. Read the user's actual Windows pinned taskbar shortcuts
+    taskbar_dir = os.path.expandvars(r"%APPDATA%\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar")
+    if os.path.exists(taskbar_dir):
+        for lnk in sorted(glob.glob(os.path.join(taskbar_dir, "*.lnk"))):
+            name = os.path.splitext(os.path.basename(lnk))[0]
+            if name.lower() not in seen_names:
+                seen_names.add(name.lower())
+                defaults.append(DockItemConfig(
+                    id=f"pinned-{len(defaults)}",
+                    kind="APP",
+                    app=AppConfig(target=lnk, display_name=name)
+                ))
 
-        
-    # 2. Web Browser (Brave or Edge)
-    brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
-    edge_path = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-    if os.path.exists(brave_path):
+    # 2. Check Discord
+    discord_lnk = os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Discord.lnk")
+    if not os.path.exists(discord_lnk):
+        discord_lnk = os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Discord Inc\Discord.lnk")
+    if os.path.exists(discord_lnk) and "discord" not in seen_names:
+        seen_names.add("discord")
         defaults.append(DockItemConfig(
-            id="default-brave",
-            kind="APP",
-            app=AppConfig(target=brave_path, display_name="Brave Browser")
-        ))
-    elif os.path.exists(edge_path):
-        defaults.append(DockItemConfig(
-            id="default-edge",
-            kind="APP",
-            app=AppConfig(target=edge_path, display_name="Microsoft Edge")
-        ))
-        
-    # 3. Discord
-    discord_lnk = os.path.expandvars(r"%APPDATA%\Microsoft\Windows\Start Menu\Programs\Discord Inc\Discord.lnk")
-    if os.path.exists(discord_lnk):
-        defaults.append(DockItemConfig(
-            id="default-discord",
+            id="pinned-discord",
             kind="APP",
             app=AppConfig(target=discord_lnk, display_name="Discord")
         ))
-        
-    # 4. Notepad
-    notepad_path = r"C:\Windows\System32\notepad.exe"
-    if os.path.exists(notepad_path):
-        defaults.append(DockItemConfig(
-            id="default-notepad",
-            kind="APP",
-            app=AppConfig(target=notepad_path, display_name="Notepad")
-        ))
-        
-    # 5. Terminal / CMD
-    cmd_path = r"C:\Windows\System32\cmd.exe"
-    if os.path.exists(cmd_path):
-        defaults.append(DockItemConfig(
-            id="default-cmd",
-            kind="APP",
-            app=AppConfig(target=cmd_path, display_name="Command Prompt")
-        ))
-        
-    # 6. ARIS Brand Label
-    defaults.append(DockItemConfig(
-        id="default-label",
-        kind="LABEL",
-        label=LabelConfig(text="ARIS", is_bold=True, text_color="#00E5FF", bg_color="#1E293B", bg_opacity=80, corner_radius=8)
-    ))
-    
+
+    # 3. Fallbacks if folder was empty
+    if not defaults:
+        explorer_path = r"C:\Windows\explorer.exe"
+        if os.path.exists(explorer_path):
+            defaults.append(DockItemConfig(
+                id="default-explorer",
+                kind="APP",
+                app=AppConfig(target=explorer_path, display_name="File Explorer")
+            ))
+        brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
+        if os.path.exists(brave_path):
+            defaults.append(DockItemConfig(
+                id="default-brave",
+                kind="APP",
+                app=AppConfig(target=brave_path, display_name="Brave Browser")
+            ))
+
     return defaults
 
 @dataclass
 class Settings:
+
     schema_version: int = 1
     taskbar: TaskbarSettings = field(default_factory=TaskbarSettings)
     dock: DockSettings = field(default_factory=DockSettings)
