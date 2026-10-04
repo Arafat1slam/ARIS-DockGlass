@@ -34,10 +34,15 @@ class SettingsWindow(QWidget):
         self.slider_opacity = QSlider(Qt.Orientation.Horizontal)
         self.slider_opacity.setRange(0, 255)
         
+        self.cb_hide_taskbar = QCheckBox("Hide Native Windows Taskbar (macOS Style)")
+        self.cb_hide_taskbar.setChecked(True)
+        
         layout.addRow("Taskbar Mode:", self.mode_cb)
         layout.addRow("Tint Color:", self.btn_color)
         layout.addRow("Opacity:", self.slider_opacity)
+        layout.addRow("", self.cb_hide_taskbar)
         self.tabs.addTab(tab, "Taskbar")
+
 
     def _init_dock_tab(self) -> None:
         tab = QWidget()

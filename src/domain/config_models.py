@@ -9,6 +9,7 @@ class TaskbarSettings:
     mode: str = 'ACRYLIC'
     tint_hex: str = '#101820'
     opacity_percent: int = 80
+    hide_windows_taskbar: bool = True
 
     def validate(self):
         if self.mode not in ('CLEAR', 'BLUR', 'ACRYLIC', 'TINT'):
@@ -17,6 +18,7 @@ class TaskbarSettings:
             self.tint_hex = '#101820'
         if not (0 <= self.opacity_percent <= 100):
             self.opacity_percent = 80
+
 
 @dataclass
 class DockSettings:
@@ -98,6 +100,13 @@ def get_default_dock_items() -> List[DockItemConfig]:
     import os
     defaults = []
     
+    # 0. Windows Start Menu
+    defaults.append(DockItemConfig(
+        id="default-start",
+        kind="APP",
+        app=AppConfig(target="start-menu", display_name="Start Menu")
+    ))
+
     # 1. File Explorer
     explorer_path = r"C:\Windows\explorer.exe"
     if os.path.exists(explorer_path):
@@ -106,6 +115,7 @@ def get_default_dock_items() -> List[DockItemConfig]:
             kind="APP",
             app=AppConfig(target=explorer_path, display_name="File Explorer")
         ))
+
         
     # 2. Web Browser (Brave or Edge)
     brave_path = r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"

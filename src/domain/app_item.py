@@ -76,7 +76,16 @@ class AppItem(DockItem):
         if self._pixmap is None:
             self._load_pixmap()
 
-        if self._pixmap and not self._pixmap.isNull():
+        if self.display_name == "Start Menu" or self.config.target == "start-menu":
+            gap = max(2, int(3 * scale))
+            half = (size - gap) // 2
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(QColor(0, 164, 239))
+            painter.drawRoundedRect(icon_rect.left(), icon_rect.top(), half, half, 3, 3)
+            painter.drawRoundedRect(icon_rect.left() + half + gap, icon_rect.top(), half, half, 3, 3)
+            painter.drawRoundedRect(icon_rect.left(), icon_rect.top() + half + gap, half, half, 3, 3)
+            painter.drawRoundedRect(icon_rect.left() + half + gap, icon_rect.top() + half + gap, half, half, 3, 3)
+        elif self._pixmap and not self._pixmap.isNull():
             painter.drawPixmap(icon_rect, self._pixmap)
         else:
             painter.setBrush(QColor(45, 55, 75, 230))
@@ -112,6 +121,19 @@ class AppItem(DockItem):
         target = self.config.target
         if not target:
             return
+
+        if target == "start-menu" or self.display_name == "Start Menu":
+            try:
+                import ctypes
+                user32 = ctypes.windll.user32
+                VK_LWIN = 0x5B
+                KEYEVENTF_KEYUP = 0x0002
+                user32.keybd_event(VK_LWIN, 0, 0, 0)
+                user32.keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, 0)
+            except Exception as e:
+                logger.error(f"Failed to trigger start menu: {e}")
+            return
+
 
         parsed = urllib.parse.urlparse(target)
         if parsed.scheme in ('http', 'https'):

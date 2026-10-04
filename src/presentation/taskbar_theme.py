@@ -60,15 +60,28 @@ class TaskbarTheme(QObject):
     def restore_default(cls) -> None:
         try:
             inst = cls()
+            inst.set_taskbar_visible(True)
             inst.restore()
         except Exception:
             pass
+
 
     def set_mode(self, mode: TaskbarMode, tint_color: int = 0x00000000) -> None:
 
         self.mode = mode
         self.tint_color = tint_color
         self.apply()
+
+    def set_taskbar_visible(self, visible: bool) -> None:
+        hwnds = self._get_taskbars()
+        SW_HIDE = 0
+        SW_SHOW = 5
+        cmd = SW_SHOW if visible else SW_HIDE
+        for hwnd in hwnds:
+            try:
+                user32.ShowWindow(hwnd, cmd)
+            except Exception:
+                pass
 
     def apply(self) -> None:
         hwnds = self._get_taskbars()
@@ -79,10 +92,22 @@ class TaskbarTheme(QObject):
         for hwnd in hwnds:
             self._apply_to_hwnd(hwnd)
 
+        # Check if user wants native taskbar hidden
+        hide_tb = True
+        if self.app_state and hasattr(self.app_state, 'settings_store') and self.app_state.settings_store:
+            try:
+                st = self.app_state.settings_store.load()
+                hide_tb = getattr(st.taskbar, 'hide_windows_taskbar', True)
+            except Exception:
+                pass
+        self.set_taskbar_visible(not hide_tb)
+
     def restore(self) -> None:
+        self.set_taskbar_visible(True)
         hwnds = self._get_taskbars()
         for hwnd in hwnds:
             self._restore_hwnd(hwnd)
+
 
     def _get_taskbars(self) -> list:
         hwnds = []
