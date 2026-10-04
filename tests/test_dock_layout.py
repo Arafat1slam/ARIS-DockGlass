@@ -1,5 +1,5 @@
 import unittest
-from dock_layout import calculate_layout
+from src.domain.dock_layout import calculate_layout
 
 class TestDockLayout(unittest.TestCase):
     def test_total_width(self):

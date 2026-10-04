@@ -3,7 +3,7 @@ import ctypes.wintypes
 from PySide6.QtWidgets import QWidget, QApplication
 from PySide6.QtCore import Qt, QTimer, QRect, QPoint, QEvent
 from PySide6.QtGui import QPainter, QColor, QRegion, QMouseEvent, QPaintEvent
-from dock_controller import DockController
+from .dock_controller import DockController
 
 user32 = ctypes.windll.user32
 GWL_EXSTYLE = -20

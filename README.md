@@ -116,49 +116,55 @@ pyinstaller --noconsole --name "ARIS DockGlass" --icon=icon.ico main.py
 
 ## 🏗️ Architecture
 
-ARIS DockGlass follows a clean **layered architecture** with flat module files:
+ARIS DockGlass follows a clean **layered architecture** with organized packages:
 
 ```
 ARIS-DockGlass/
 │
-├── main.py                  # 🚀 Entry point & composition root
+├── 🚀 main.py                          # Entry point & composition root
 │
-├── 📦 Infrastructure
-│   ├── constants.py         # App constants & defaults
-│   ├── paths.py             # %APPDATA% / %LOCALAPPDATA% resolution
-│   ├── logger.py            # Rotating log (5MB × 3 files)
-│   ├── single_instance.py   # Named mutex (one instance only)
-│   ├── win_interop.py       # All Win32 ctypes declarations
-│   ├── icon_provider.py     # Icon extraction & two-level cache
-│   └── startup.py           # Windows startup registry toggle
+├── 📂 src/                              # Source packages
+│   ├── 📦 infrastructure/              # System-level services
+│   │   ├── constants.py                # App constants & defaults
+│   │   ├── paths.py                    # %APPDATA% / %LOCALAPPDATA% resolution
+│   │   ├── logger.py                   # Rotating log (5MB × 3 files)
+│   │   ├── single_instance.py          # Named mutex (one instance only)
+│   │   ├── win_interop.py              # All Win32 ctypes declarations
+│   │   ├── icon_provider.py            # Icon extraction & two-level cache
+│   │   └── startup.py                  # Windows startup registry toggle
+│   │
+│   ├── 🧮 domain/                      # Pure Python — no Qt, no ctypes
+│   │   ├── config_models.py            # Settings dataclasses & validation
+│   │   ├── settings_store.py           # Load/save/backup/migrate settings
+│   │   ├── magnification.py            # Gaussian scale math & easing
+│   │   ├── dock_layout.py              # Item positioning math
+│   │   ├── dock_item.py                # Abstract DockItem interface
+│   │   ├── app_item.py                 # Launchable app/folder/URL item
+│   │   └── label_item.py               # Custom styled text label item
+│   │
+│   └── 🎨 presentation/               # PySide6 / Qt 6 UI layer
+│       ├── dock_window.py              # Frameless transparent overlay
+│       ├── dock_controller.py          # Animation & hover management
+│       ├── taskbar_theme.py            # Transparency engine & watchdog
+│       ├── settings_window.py          # Tabbed settings UI
+│       ├── tray.py                     # System tray icon & menu
+│       ├── label_service.py            # Label CRUD operations
+│       ├── pinned_apps.py              # Pinned app management
+│       └── app_state.py                # Runtime state & signal hub
 │
-├── 🧮 Domain (Pure Python — no Qt, no ctypes)
-│   ├── config_models.py     # Settings dataclasses & validation
-│   ├── settings_store.py    # Load/save/backup/migrate settings
-│   ├── magnification.py     # Gaussian scale math & easing
-│   ├── dock_layout.py       # Item positioning math
-│   ├── dock_item.py         # Abstract DockItem interface
-│   ├── app_item.py          # Launchable app/folder/URL item
-│   └── label_item.py        # Custom styled text label item
-│
-├── 🎨 Presentation (PySide6 / Qt 6)
-│   ├── dock_window.py       # Frameless transparent overlay
-│   ├── dock_controller.py   # Animation & hover management
-│   ├── taskbar_theme.py     # Transparency engine & watchdog
-│   ├── settings_window.py   # Tabbed settings UI
-│   ├── tray.py              # System tray icon & menu
-│   ├── label_service.py     # Label CRUD operations
-│   ├── pinned_apps.py       # Pinned app management
-│   └── app_state.py         # Runtime state & signal hub
-│
-├── 🧪 tests/
+├── 🧪 tests/                           # Unit & integration tests
 │   ├── test_magnification.py
 │   ├── test_dock_layout.py
 │   ├── test_settings_store.py
 │   └── test_path_validation.py
 │
+├── 📚 docs/                             # Documentation & specs
+│   └── ARIS_TaskbarDock_PLAN.md         # Engineering plan
+│
+├── 🎨 assets/                           # Icons, images & resources
+│
 ├── requirements.txt
-├── LICENSE                  # MIT License
+├── LICENSE                              # MIT License
 └── README.md
 ```
 

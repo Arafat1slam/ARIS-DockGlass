@@ -1,7 +1,7 @@
 import unittest
 import os
 import tempfile
-from settings_store import SettingsStore
+from src.domain.settings_store import SettingsStore
 
 class TestSettingsStore(unittest.TestCase):
     def setUp(self):

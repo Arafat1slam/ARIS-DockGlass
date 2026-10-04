@@ -4,8 +4,8 @@ import os
 import time
 import shutil
 from typing import Optional
-import paths
-from config_models import Settings
+from src.infrastructure import paths
+from .config_models import Settings
 
 logger = logging.getLogger(__name__)
 

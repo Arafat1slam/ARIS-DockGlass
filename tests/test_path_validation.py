@@ -1,5 +1,5 @@
 import unittest
-from paths import validate_path
+from src.infrastructure.paths import validate_path
 
 class TestPathValidation(unittest.TestCase):
     def test_rejects_traversal(self):

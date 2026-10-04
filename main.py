@@ -7,18 +7,18 @@ import traceback
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
 
-from single_instance import SingleInstance
-from logger import setup_logging, get_logger
-from settings_store import SettingsStore
-from app_state import AppState
-from taskbar_theme import TaskbarTheme
-from dock_controller import DockController
-from dock_window import DockWindow
-from settings_window import SettingsWindow
-from tray import TrayIcon
-from pinned_apps import PinnedApps
-from label_service import LabelService
-from constants import APP_NAME
+from src.infrastructure.single_instance import SingleInstance
+from src.infrastructure.logger import setup_logging, get_logger
+from src.infrastructure.constants import APP_NAME
+from src.domain.settings_store import SettingsStore
+from src.presentation.app_state import AppState
+from src.presentation.taskbar_theme import TaskbarTheme
+from src.presentation.dock_controller import DockController
+from src.presentation.dock_window import DockWindow
+from src.presentation.settings_window import SettingsWindow
+from src.presentation.tray import TrayManager
+from src.presentation.pinned_apps import PinnedApps
+from src.presentation.label_service import LabelService
 
 logger = get_logger(__name__)
 
@@ -89,7 +89,7 @@ def main():
             settings_window.activateWindow()
 
         # 10. Create tray icon
-        tray_icon = TrayIcon(app, show_settings, app.quit)
+        tray_icon = TrayManager(app, show_settings, app.quit)
         tray_icon.show()
 
         # 12. Run event loop

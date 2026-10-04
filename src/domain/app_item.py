@@ -3,8 +3,8 @@ import subprocess
 import urllib.parse
 import logging
 from typing import Any
-from dock_item import DockItem
-from config_models import AppConfig
+from .dock_item import DockItem
+from .config_models import AppConfig
 from PySide6.QtCore import QRect, Qt
 from PySide6.QtGui import QPainter, QIcon, QColor, QPen
 

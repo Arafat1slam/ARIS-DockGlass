@@ -2,7 +2,7 @@ import sys
 from PySide6.QtWidgets import QSystemTrayIcon, QMenu, QApplication
 from PySide6.QtGui import QIcon, QAction
 from PySide6.QtCore import QObject
-from app_state import global_state
+from .app_state import global_state
 
 class TrayManager(QObject):
     def __init__(self) -> None:

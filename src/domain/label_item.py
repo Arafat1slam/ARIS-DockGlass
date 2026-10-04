@@ -1,6 +1,6 @@
 from typing import Any, Optional
-from dock_item import DockItem
-from config_models import LabelConfig
+from .dock_item import DockItem
+from .config_models import LabelConfig
 from PySide6.QtCore import QRect, QRectF, Qt
 from PySide6.QtGui import QPainter, QColor, QFont, QPainterPath, QPixmap
 
