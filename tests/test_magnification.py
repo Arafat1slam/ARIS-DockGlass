@@ -1,0 +1,24 @@
+import unittest
+import math
+from magnification import calculate_magnification
+
+class TestMagnification(unittest.TestCase):
+    def test_scale_at_distance_zero(self):
+        scale = calculate_magnification(0, max_scale=2.0)
+        self.assertEqual(scale, 2.0)
+
+    def test_scale_at_large_distance(self):
+        scale = calculate_magnification(1000, max_scale=2.0, radius=100)
+        self.assertEqual(scale, 1.0)
+
+    def test_monotonic_decrease(self):
+        scale1 = calculate_magnification(10, max_scale=2.0, radius=100)
+        scale2 = calculate_magnification(20, max_scale=2.0, radius=100)
+        self.assertGreater(scale1, scale2)
+
+    def test_easing_converges(self):
+        scale = calculate_magnification(100, max_scale=2.0, radius=100)
+        self.assertAlmostEqual(scale, 1.0, places=2)
+
+if __name__ == '__main__':
+    unittest.main()
