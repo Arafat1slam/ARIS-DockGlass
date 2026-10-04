@@ -41,3 +41,6 @@ class PinnedAppsManager(QObject):
 
     def get_apps(self) -> List[str]:
         return self._apps.copy()
+
+PinnedApps = PinnedAppsManager
+
